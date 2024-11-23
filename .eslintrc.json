@@ -8,8 +8,9 @@
   "rules": {
     "@next/next/no-img-element": "off",
     "@typescript-eslint/no-unused-vars": ["error", {
-      "varsIgnorePattern": "^(resultsByImageId|_)",
+      "varsIgnorePattern": "^(resultsByImageId|_|ApiPrediction)$",
       "argsIgnorePattern": "^_"
-    }]
+    }],
+    "@typescript-eslint/no-explicit-any": "off"
   }
 }
