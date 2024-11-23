@@ -34,14 +34,13 @@ export function DetectionTable({ predictions, showConfidence, showAnimations }: 
               key={`${prediction.label}-${index}`}
               className="bg-white border-b hover:bg-gray-50"
               style={showAnimations ? {
-                opacity: 0,
-                animation: `fadeIn 0.5s ease-in-out ${index * 0.1}s forwards`
+                animation: `row-fade-in 0.5s ease-in-out ${index * 0.1}s forwards`
               } : undefined}
             >
               <td className="px-6 py-4 text-black">{prediction.label}</td>
               <td className="px-6 py-4 text-black">{prediction.count}</td>
               {showConfidence && (
-                <td className="px-6 py-4 text-black">{(prediction.confidence * 100).toFixed(1)}%</td>
+                <td className="px-6 py-4 text-black">{prediction.confidence.toFixed(1)}%</td>
               )}
             </tr>
           ))}
