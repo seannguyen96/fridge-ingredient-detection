@@ -47,31 +47,39 @@ export function useDetection() {
       setError(null);
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
-      console.log('Using API URL:', apiUrl);
+      console.log('API URL:', apiUrl);
+
+      // Convert base64 to file
+      const formData = new FormData();
+      for (let i = 0; i < images.length; i++) {
+        // Convert base64 to blob
+        const response = await fetch(images[i].src);
+        const blob = await response.blob();
+        
+        // Create file from blob
+        const file = new File([blob], `image-${i}.jpg`, { type: 'image/jpeg' });
+        formData.append('files', file);
+      }
 
       const response = await fetch(`${apiUrl}/detect`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          images: images.map(img => img.src)
-        })
+        body: formData, // Send as FormData, not JSON
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Detection failed');
+        console.error('API Error:', errorData);
+        throw new Error(errorData.detail || errorData.message || 'Detection failed');
       }
 
-      const result = await response.json();
-      console.log('API Response:', result);
+      const data = await response.json();
+      console.log('API Response:', data);
 
-      if (!result?.predictions) {
+      if (!data?.predictions) {
         throw new Error('Invalid response format');
       }
 
-      const transformedPredictions = result.predictions.map((pred: ApiPrediction) => ({
+      const transformedPredictions = data.predictions.map((pred: ApiPrediction) => ({
         name: pred.label,
         quantity: pred.count,
         confidence: pred.confidence
