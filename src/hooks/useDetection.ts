@@ -68,13 +68,37 @@ export function useDetection() {
 
       const data = await response.json() as ApiResponse;
       console.log('Raw API response:', data);
+      console.log('Results array:', data.results);
+      console.log('First result:', data.results[0]);
+
+      if (!data.results || !Array.isArray(data.results)) {
+        console.error('Invalid API response structure:', data);
+        throw new Error('Invalid API response format');
+      }
 
       const allTransformedResults = data.results.map((result, index) => {
-        const transformedPredictions = Object.entries(result).map(([_, details]) => ({
-          label: details.name,
-          count: details.quantity,
-          confidence: details.confidence
-        }));
+        console.log(`Processing result ${index}:`, result);
+        
+        if (!result || typeof result !== 'object') {
+          console.error('Invalid result object:', result);
+          throw new Error('Invalid result format');
+        }
+
+        const transformedPredictions = Object.entries(result).map(([key, details]) => {
+          console.log(`Processing detection "${key}":`, details);
+          
+          if (!details || !details.name || !details.quantity || !details.confidence) {
+            console.error('Invalid details object:', details);
+            throw new Error('Invalid details format');
+          }
+
+          return {
+            label: details.name,
+            count: details.quantity,
+            confidence: details.confidence
+          };
+        });
+        console.log('Transformed predictions:', transformedPredictions);
         return { id: imageIds[index], predictions: transformedPredictions };
       });
 
