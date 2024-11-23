@@ -8,6 +8,8 @@ interface DetectionTableProps {
 }
 
 export function DetectionTable({ predictions, showConfidence, showAnimations }: DetectionTableProps) {
+  console.log('DetectionTable received predictions:', predictions);
+
   if (!predictions || predictions.length === 0) return null;
 
   const getDelay = (index: number) => {
