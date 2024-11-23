@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, DragEvent, ChangeEvent } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 interface ImageDropzoneProps {
   onImageSelected: (images: HTMLImageElement[]) => void;
@@ -12,6 +13,11 @@ interface ImageDropzoneProps {
   maxImages: number;
   onRemoveImage: (imageId: string) => void;
   isProcessing: boolean;
+}
+
+interface ProcessedImage {
+  element: HTMLImageElement;
+  id: string;
 }
 
 export function ImageDropzone({ 
@@ -65,23 +71,28 @@ export function ImageDropzone({
     const remainingSlots = maxImages - currentImages.length;
     const filesToProcess = imageFiles.slice(0, remainingSlots);
 
-    const processedImages: HTMLImageElement[] = await Promise.all(
-      filesToProcess.map(file => {
-        return new Promise((resolve) => {
+    const processedImages = await Promise.all<ProcessedImage>(
+      filesToProcess.map((file) => {
+        return new Promise<ProcessedImage>((resolve) => {
           const reader = new FileReader();
-          reader.onloadend = () => {
-            const img = new Image();
-            img.src = reader.result as string;
+          const img = new Image();
+          const imageId = uuidv4();
+
+          reader.onload = () => {
             img.onload = () => {
-              resolve(img);
+              resolve({
+                element: img,
+                id: imageId
+              });
             };
+            img.src = reader.result as string;
           };
-          reader.readAsDataURL(file);
+          reader.readAsDataURL(file as File);
         });
       })
     );
 
-    onImageSelected(processedImages);
+    onImageSelected(processedImages.map(p => p.element));
   };
 
   return (
