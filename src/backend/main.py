@@ -8,18 +8,23 @@ from typing import List
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from os import getenv
 
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# Get CORS origins from environment variable, fallback to "*" for development
+origins = getenv("CORS_ORIGINS", "*").split(",")
+print(f"Allowed origins: {origins}")  # Debug log
+
 # CORS settings
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=False,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST"],  # Be specific about methods
     allow_headers=["*"],
 )
 
