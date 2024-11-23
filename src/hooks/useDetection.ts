@@ -1,6 +1,20 @@
 import { useState } from 'react';
 import { DetectionItem } from '../types/detection';
 
+interface ApiDetails {
+  name: string;
+  quantity: number;
+  confidence: number;
+}
+
+interface ApiResult {
+  [key: string]: ApiDetails;
+}
+
+interface ApiResponse {
+  results: ApiResult[];
+}
+
 export function useDetection() {
   const [predictions, setPredictions] = useState<DetectionItem[]>([]);
   const [resultsByImageId, setResultsByImageId] = useState<Map<string, DetectionItem[]>>(new Map()); // Used for aggregating results across multiple images
@@ -52,13 +66,11 @@ export function useDetection() {
         throw new Error(errorData.detail || errorData.message || 'Detection failed');
       }
 
-      const data = await response.json();
+      const data = await response.json() as ApiResponse;
       console.log('Raw API response:', data);
 
-      // @ts-expect-error
       const allTransformedResults = data.results.map((result, index) => {
-        // @ts-expect-error
-        const transformedPredictions = Object.entries(result || {}).map(([_, details]) => ({
+        const transformedPredictions = Object.entries(result).map(([_, details]) => ({
           label: details.name,
           count: details.quantity,
           confidence: details.confidence
