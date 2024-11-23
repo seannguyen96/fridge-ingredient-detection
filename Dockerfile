@@ -1,25 +1,26 @@
-FROM python:3.9-slim
+# Use multi-stage build
+FROM python:3.11-slim as builder
 
-WORKDIR /app
-
-# Install all required system dependencies
-RUN apt-get update && apt-get install -y \
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    curl \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy backend files including the model
-COPY src/backend /app/src/backend
+# Copy only requirements first
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Set Python path and model path
-ENV PYTHONPATH=/app/src/backend
-ENV MODEL_PATH=/app/src/backend/yolov8n.pt
+# Final stage
+FROM python:3.11-slim
+
+# Copy installed packages from builder
+COPY --from=builder /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
+
+# Copy app code
+COPY . .
+
+# Set environment variables
 ENV PORT=8000
 
-# Install Python dependencies
-RUN pip install -r /app/src/backend/requirements.txt
-
-# Command to run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"] 
+# Start command
+CMD ["uvicorn", "src.backend.main:app", "--host", "0.0.0.0", "--port", "8000"] 
