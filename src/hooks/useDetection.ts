@@ -35,13 +35,6 @@ export function useDetection() {
   const [error, setError] = useState<string | null>(null);
 
   const detectObjects = async (images: HTMLImageElement[], imageIds: string[]) => {
-    if (!images || images.length === 0 || !imageIds || imageIds.length === 0) {
-      if (predictions.length === 0) {
-        setError('Please select an image to process.');
-      }
-      return;
-    }
-
     try {
       setIsProcessing(true);
       setError(null);
@@ -63,7 +56,7 @@ export function useDetection() {
 
       const response = await fetch(`${apiUrl}/detect`, {
         method: 'POST',
-        body: formData, // Send as FormData, not JSON
+        body: formData,
       });
 
       if (!response.ok) {
@@ -73,32 +66,35 @@ export function useDetection() {
       }
 
       const data = await response.json();
-      console.log('API Response:', data);
+      console.log('Raw API response:', data);
 
-      if (!data?.predictions) {
-        throw new Error('Invalid response format');
-      }
+      // Transform all results maintaining image-result relationship
+      const allTransformedResults = data.results.map((result: any, index: number) => {
+        const transformedPredictions = Object.entries(result || {}).map(([_, details]: [string, any]) => ({
+          label: details.name,
+          count: details.quantity,
+          confidence: details.confidence
+        }));
+        return { id: imageIds[index], predictions: transformedPredictions };
+      });
 
-      const transformedPredictions = data.predictions.map((pred: ApiPrediction) => ({
-        name: pred.label,
-        quantity: pred.count,
-        confidence: pred.confidence
-      }));
+      console.log('Transformed results:', allTransformedResults);
 
+      // Update state preserving multiple image results
       setResultsByImageId(prev => {
         const newMap = new Map(prev);
-        newMap.set(imageIds[0], transformedPredictions);
-        
+        allTransformedResults.forEach(({ id, predictions }) => {
+          newMap.set(id, predictions);
+        });
         const aggregated = aggregatePredictions(newMap);
         setPredictions(aggregated);
-        
         return newMap;
       });
 
-    } catch (err) {
-      console.error('Detection error:', err);
-      setError('Failed to process image. Please try again.');
-    } finally {
+      setIsProcessing(false);
+    } catch (error) {
+      console.error('Detection error:', error);
+      setError('Failed to process image');
       setIsProcessing(false);
     }
   };
