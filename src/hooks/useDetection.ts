@@ -46,7 +46,10 @@ export function useDetection() {
       setIsProcessing(true);
       setError(null);
 
-      const response = await fetch('/api/detect', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      console.log('Using API URL:', apiUrl);
+
+      const response = await fetch(`${apiUrl}/detect`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,11 +60,12 @@ export function useDetection() {
       });
 
       if (!response.ok) {
-        throw new Error(`Detection error: ${response.statusText}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Detection failed');
       }
 
       const result = await response.json();
-      console.log('Raw API Response:', result);
+      console.log('API Response:', result);
 
       if (!result?.predictions) {
         throw new Error('Invalid response format');
