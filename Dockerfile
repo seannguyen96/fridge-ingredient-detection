@@ -23,4 +23,4 @@ COPY . .
 ENV PORT=8000
 
 # Start command
-CMD ["uvicorn", "src.backend.main:app", "--host", "0.0.0.0", "--port", "8000"] 
+CMD ["python", "-m", "uvicorn", "src.backend.main:app", "--host", "0.0.0.0", "--port", "8000"] 
