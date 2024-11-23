@@ -55,9 +55,9 @@ export function useDetection() {
       const data = await response.json();
       console.log('Raw API response:', data);
 
-      // @ts-ignore
+      // @ts-expect-error
       const allTransformedResults = data.results.map((result, index) => {
-        // @ts-ignore
+        // @ts-expect-error
         const transformedPredictions = Object.entries(result || {}).map(([_, details]) => ({
           label: details.name,
           count: details.quantity,
