@@ -29,7 +29,7 @@ export function DetectionTable({ predictions, showConfidence, showAnimations }: 
         <tbody>
           {predictions.map((prediction, index) => (
             <tr 
-              key={`${prediction.name}-${index}`}
+              key={`${prediction.label}-${index}`}
               className="bg-white border-b"
               style={showAnimations ? {
                 opacity: 0,
