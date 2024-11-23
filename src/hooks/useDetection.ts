@@ -22,21 +22,29 @@ export function useDetection() {
   const [error, setError] = useState<string | null>(null);
 
   const aggregatePredictions = (resultsMap: Map<string, DetectionItem[]>): DetectionItem[] => {
+    console.log('Starting aggregation with map:', resultsMap);
     const aggregated = new Map<string, DetectionItem>();
     
     for (const predictions of resultsMap.values()) {
+      console.log('Processing predictions batch:', predictions);
       predictions.forEach(prediction => {
+        console.log('Processing single prediction:', prediction);
         const existing = aggregated.get(prediction.label);
         if (existing) {
+          console.log('Found existing item:', existing);
           existing.count += prediction.count;
           existing.confidence = (existing.confidence + prediction.confidence) / 2;
+          console.log('Updated existing item:', existing);
         } else {
+          console.log('Adding new item:', prediction);
           aggregated.set(prediction.label, { ...prediction });
         }
       });
     }
     
-    return Array.from(aggregated.values());
+    const result = Array.from(aggregated.values());
+    console.log('Final aggregated results:', result);
+    return result;
   };
 
   const detectObjects = async (images: HTMLImageElement[], imageIds: string[]) => {
@@ -85,13 +93,7 @@ export function useDetection() {
         }
 
         const transformedPredictions = Object.entries(result).map(([key, details]) => {
-          console.log(`Processing detection "${key}":`, details);
-          
-          if (!details || !details.name || !details.quantity || !details.confidence) {
-            console.error('Invalid details object:', details);
-            throw new Error('Invalid details format');
-          }
-
+          console.log(`Transforming detection "${key}":`, details);
           return {
             label: details.name,
             count: details.quantity,
@@ -101,6 +103,8 @@ export function useDetection() {
         console.log('Transformed predictions:', transformedPredictions);
         return { id: imageIds[index], predictions: transformedPredictions };
       });
+
+      console.log('All transformed results:', allTransformedResults);
 
       setResultsByImageId(prev => {
         const newMap = new Map(prev);
