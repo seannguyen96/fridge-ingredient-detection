@@ -1,6 +1,6 @@
 export interface DetectionItem {
-  name: string;
-  quantity: number;
+  label: string;
+  count: number;
   confidence: number;
 }
 

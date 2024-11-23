@@ -1,32 +1,29 @@
 import { useState } from 'react';
-import { DetectionItem, ApiResponse, TransformedPrediction, ResultWithId } from '../types/detection';
-
-const aggregatePredictions = (resultsMap: Map<string, DetectionItem[]>): DetectionItem[] => {
-  const combinedMap = new Map<string, DetectionItem>();
-
-  for (const predictions of resultsMap.values()) {
-    for (const pred of predictions) {
-      const existing = combinedMap.get(pred.name);
-      if (existing) {
-        combinedMap.set(pred.name, {
-          name: pred.name,
-          quantity: existing.quantity + pred.quantity,
-          confidence: (existing.confidence + pred.confidence) / 2
-        });
-      } else {
-        combinedMap.set(pred.name, { ...pred });
-      }
-    }
-  }
-
-  return Array.from(combinedMap.values());
-};
+import { DetectionItem } from '../types/detection';
 
 export function useDetection() {
   const [predictions, setPredictions] = useState<DetectionItem[]>([]);
   const [resultsByImageId, setResultsByImageId] = useState<Map<string, DetectionItem[]>>(new Map()); // Used for aggregating results across multiple images
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const aggregatePredictions = (resultsMap: Map<string, DetectionItem[]>): DetectionItem[] => {
+    const aggregated = new Map<string, DetectionItem>();
+    
+    for (const predictions of resultsMap.values()) {
+      predictions.forEach(prediction => {
+        const existing = aggregated.get(prediction.label);
+        if (existing) {
+          existing.count += prediction.count;
+          existing.confidence = (existing.confidence + prediction.confidence) / 2;
+        } else {
+          aggregated.set(prediction.label, { ...prediction });
+        }
+      });
+    }
+    
+    return Array.from(aggregated.values());
+  };
 
   const detectObjects = async (images: HTMLImageElement[], imageIds: string[]) => {
     try {
@@ -55,19 +52,19 @@ export function useDetection() {
         throw new Error(errorData.detail || errorData.message || 'Detection failed');
       }
 
-      const data = await response.json() as ApiResponse;
+      const data = await response.json();
       console.log('Raw API response:', data);
 
-      const allTransformedResults: ResultWithId[] = data.results.map((result, index) => {
-        const transformedPredictions: TransformedPrediction[] = Object.entries(result || {}).map(([_, details]) => ({
+      // @ts-ignore
+      const allTransformedResults = data.results.map((result, index) => {
+        // @ts-ignore
+        const transformedPredictions = Object.entries(result || {}).map(([_, details]) => ({
           label: details.name,
           count: details.quantity,
           confidence: details.confidence
         }));
         return { id: imageIds[index], predictions: transformedPredictions };
       });
-
-      console.log('Transformed results:', allTransformedResults);
 
       setResultsByImageId(prev => {
         const newMap = new Map(prev);
