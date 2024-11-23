@@ -46,7 +46,7 @@ export function useDetection() {
       setIsProcessing(true);
       setError(null);
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
       console.log('Using API URL:', apiUrl);
 
       const response = await fetch(`${apiUrl}/detect`, {
