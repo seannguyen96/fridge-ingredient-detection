@@ -1,11 +1,5 @@
 import { useState } from 'react';
-import { DetectionItem } from '@/types/detection';
-
-interface ApiPrediction {
-  label: string;
-  count: number;
-  confidence: number;
-}
+import { DetectionItem, ApiResponse, TransformedPrediction, ResultWithId } from '../types/detection';
 
 const aggregatePredictions = (resultsMap: Map<string, DetectionItem[]>): DetectionItem[] => {
   const combinedMap = new Map<string, DetectionItem>();
@@ -42,14 +36,10 @@ export function useDetection() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
       console.log('API URL:', apiUrl);
 
-      // Convert base64 to file
       const formData = new FormData();
       for (let i = 0; i < images.length; i++) {
-        // Convert base64 to blob
         const response = await fetch(images[i].src);
         const blob = await response.blob();
-        
-        // Create file from blob
         const file = new File([blob], `image-${i}.jpg`, { type: 'image/jpeg' });
         formData.append('files', file);
       }
@@ -65,12 +55,11 @@ export function useDetection() {
         throw new Error(errorData.detail || errorData.message || 'Detection failed');
       }
 
-      const data = await response.json();
+      const data = await response.json() as ApiResponse;
       console.log('Raw API response:', data);
 
-      // Transform all results maintaining image-result relationship
-      const allTransformedResults = data.results.map((result: any, index: number) => {
-        const transformedPredictions = Object.entries(result || {}).map(([_, details]: [string, any]) => ({
+      const allTransformedResults: ResultWithId[] = data.results.map((result, index) => {
+        const transformedPredictions: TransformedPrediction[] = Object.entries(result || {}).map(([_, details]) => ({
           label: details.name,
           count: details.quantity,
           confidence: details.confidence
@@ -80,7 +69,6 @@ export function useDetection() {
 
       console.log('Transformed results:', allTransformedResults);
 
-      // Update state preserving multiple image results
       setResultsByImageId(prev => {
         const newMap = new Map(prev);
         allTransformedResults.forEach(({ id, predictions }) => {
