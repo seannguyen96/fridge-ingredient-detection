@@ -17,9 +17,9 @@ export function DetectionTable({ predictions, showConfidence, showAnimations }: 
   };
 
   return (
-    <div className="relative overflow-x-auto">
-      <table className="w-full text-sm text-left text-gray-500">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+    <div className="relative overflow-x-auto bg-white rounded-lg shadow-md">
+      <table className="w-full text-sm text-left text-black">
+        <thead className="text-xs text-black uppercase bg-gray-50">
           <tr>
             <th scope="col" className="px-6 py-3">Item</th>
             <th scope="col" className="px-6 py-3">Quantity</th>
@@ -32,16 +32,16 @@ export function DetectionTable({ predictions, showConfidence, showAnimations }: 
           {predictions.map((prediction, index) => (
             <tr 
               key={`${prediction.label}-${index}`}
-              className="bg-white border-b"
+              className="bg-white border-b hover:bg-gray-50"
               style={showAnimations ? {
                 opacity: 0,
                 animation: `fadeIn 0.5s ease-in-out ${index * 0.1}s forwards`
               } : undefined}
             >
-              <td className="px-6 py-4">{prediction.label}</td>
-              <td className="px-6 py-4">{prediction.count}</td>
+              <td className="px-6 py-4 text-black">{prediction.label}</td>
+              <td className="px-6 py-4 text-black">{prediction.count}</td>
               {showConfidence && (
-                <td className="px-6 py-4">{(prediction.confidence * 100).toFixed(1)}%</td>
+                <td className="px-6 py-4 text-black">{(prediction.confidence * 100).toFixed(1)}%</td>
               )}
             </tr>
           ))}
