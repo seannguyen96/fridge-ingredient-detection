@@ -33,17 +33,11 @@ export function DetectionTable({ predictions, showConfidence, showAnimations }: 
               className="bg-white border-b"
               style={showAnimations ? {
                 opacity: 0,
-                animationName: 'row-fade-in',
-                animationDuration: '500ms',
-                animationTimingFunction: 'ease-out',
-                animationFillMode: 'forwards',
-                animationDelay: getDelay(index)
-              } : {
-                opacity: 1
-              }}
+                animation: `fadeIn 0.5s ease-in-out ${index * 0.1}s forwards`
+              } : undefined}
             >
-              <td className="px-6 py-4">{prediction.name}</td>
-              <td className="px-6 py-4">{prediction.quantity}</td>
+              <td className="px-6 py-4">{prediction.label}</td>
+              <td className="px-6 py-4">{prediction.count}</td>
               {showConfidence && (
                 <td className="px-6 py-4">{(prediction.confidence * 100).toFixed(1)}%</td>
               )}
