@@ -16,8 +16,8 @@ export const exportToJson = (predictions: DetectionItem[]) => {
 export const exportToCsv = (predictions: DetectionItem[]) => {
   const headers = ['Item', 'Quantity', 'Confidence'];
   const rows = predictions.map(p => [
-    p.name,
-    p.quantity.toString(),
+    p.label,
+    p.count.toString(),
     (p.confidence * 100).toFixed(1) + '%'
   ]);
   const csv = [
@@ -34,4 +34,18 @@ export const exportToCsv = (predictions: DetectionItem[]) => {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+};
+
+export const generateCSV = (predictions: DetectionItem[]): string => {
+  const headers = ['Item', 'Quantity', 'Confidence'];
+  const rows = predictions.map(p => [
+    p.label,
+    p.count.toString(),
+    (p.confidence * 100).toFixed(1) + '%'
+  ]);
+
+  return [
+    headers.join(','),
+    ...rows.map(row => row.join(','))
+  ].join('\n');
 }; 
