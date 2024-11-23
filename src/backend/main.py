@@ -15,17 +15,21 @@ app = FastAPI()
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Get CORS origins from environment variable, fallback to "*" for development
-origins = getenv("CORS_ORIGINS", "*").split(",")
-print(f"Allowed origins: {origins}")  # Debug log
+# Debug: Print environment variables
+cors_origins = getenv("CORS_ORIGINS", "*")
+print(f"CORS_ORIGINS env var: {cors_origins}")
+
+origins = cors_origins.split(",")
+print(f"Parsed origins: {origins}")
 
 # CORS settings
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=False,
-    allow_methods=["GET", "POST"],  # Be specific about methods
+    allow_credentials=True,
+    allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 @app.get("/")
