@@ -29,7 +29,8 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"]
+    expose_headers=["*"],
+    max_request_size=100_000_000  # 100MB in bytes
 )
 
 @app.get("/")
