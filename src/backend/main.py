@@ -16,21 +16,21 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Debug: Print environment variables
-cors_origins = getenv("CORS_ORIGINS", "*")
+cors_origins = getenv("CORS_ORIGINS", "https://fridge-ingredient-detection-umber.vercel.app,https://fridge-ingredient-detection-production.up.railway.app")
 print(f"CORS_ORIGINS env var: {cors_origins}")
 
-origins = cors_origins.split(",")
+# Split and clean origins, ensure no empty strings
+origins = [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
 print(f"Parsed origins: {origins}")
 
 # CORS settings
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=["*"],  # Temporarily allow all origins for testing
+    allow_credentials=False,  # Set to False when using allow_origins=["*"]
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
     expose_headers=["*"],
-    max_request_size=100_000_000  # 100MB in bytes
 )
 
 @app.get("/")
