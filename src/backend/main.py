@@ -46,7 +46,7 @@ async def root():
 @app.post("/detect")
 @limiter.limit("30/minute")
 async def detect_objects(request: Request, files: List[UploadFile] = File(...)):
-    print("Endpoint hit!")  # Debug log
+    print("Endpoint hit!")
     try:
         if len(files) > 5:
             return JSONResponse(
@@ -57,7 +57,12 @@ async def detect_objects(request: Request, files: List[UploadFile] = File(...)):
         all_results = []
         for image in files:
             print(f"Processing image: {image.filename}")
-            contents = await image.read()
+            # Read in chunks instead of all at once
+            CHUNK_SIZE = 1024 * 1024  # 1MB chunks
+            contents = b""
+            
+            while chunk := await image.read(CHUNK_SIZE):
+                contents += chunk
             
             with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as temp_file:
                 temp_file.write(contents)
@@ -67,9 +72,10 @@ async def detect_objects(request: Request, files: List[UploadFile] = File(...)):
                     results = process_fridge_image(temp_path)
                     all_results.append(results)
                 finally:
+                    # Clean up immediately
                     os.unlink(temp_path)
+                    del contents  # Free memory explicitly
         
-        print(f"Detection results: {all_results}")
         return JSONResponse(content={"results": all_results})
             
     except Exception as e:
