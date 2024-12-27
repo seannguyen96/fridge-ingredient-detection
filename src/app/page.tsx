@@ -6,7 +6,7 @@ import { DetectionSection } from '@/components/DetectionSection';
 import { useDetection } from '@/hooks/useDetection';
 import { exportToCsv, exportToJson } from '@/utils/exportUtils';
 
-const Home = () => {
+export default function Home() {
   const { 
     predictions, 
     isProcessing, 
@@ -45,6 +45,4 @@ const Home = () => {
       />
     </div>
   );
-};
-
-export default Home;
+}
