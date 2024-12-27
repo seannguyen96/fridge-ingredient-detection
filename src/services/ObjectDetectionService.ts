@@ -19,7 +19,12 @@ export class ObjectDetectionService {
       const formData = new FormData();
       formData.append('files', blob, 'image.jpg');
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/detect`, {
+      const isProd = process.env.NODE_ENV === 'production';
+      const API_URL = isProd 
+        ? 'https://fridge-ingredient-detection-production.up.railway.app' 
+        : (process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.198:8000');
+
+      const response = await fetch(`${API_URL}/detect`, {
         method: 'POST',
         body: formData
       });
