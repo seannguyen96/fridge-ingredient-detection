@@ -6,7 +6,7 @@ import { DetectionSection } from '@/components/DetectionSection';
 import { useDetection } from '@/hooks/useDetection';
 import { exportToCsv, exportToJson } from '@/utils/exportUtils';
 
-export default function Page() {
+const Home = () => {
   const { 
     predictions, 
     isProcessing, 
@@ -29,26 +29,22 @@ export default function Page() {
   };
 
   return (
-    <main className="min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <h1 className="text-2xl font-semibold text-[#101828]">
-            Fridge Ingredient Detection with AI
-          </h1>
-          <ImageUpload 
-            onImageSelected={handleImageSelected}
-            onRemoveImage={removeImageResults}
-            onClear={clearDetections}
-            isProcessing={isProcessing}
-          />
-          <DetectionSection 
-            predictions={predictions}
-            isProcessing={isProcessing}
-            error={error}
-            onExport={handleExport}
-          />
-        </div>
-      </div>
-    </main>
+    <div className="min-h-screen p-8">
+      <h1>Fridge Ingredient Detection</h1>
+      <ImageUpload 
+        onImageSelected={handleImageSelected}
+        onRemoveImage={removeImageResults}
+        onClear={clearDetections}
+        isProcessing={isProcessing}
+      />
+      <DetectionSection 
+        predictions={predictions}
+        isProcessing={isProcessing}
+        error={error}
+        onExport={handleExport}
+      />
+    </div>
   );
-}
+};
+
+export default Home;
