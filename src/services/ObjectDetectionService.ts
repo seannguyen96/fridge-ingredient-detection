@@ -17,9 +17,9 @@ export class ObjectDetectionService {
     try {
       const blob = await fetch(image.src).then(r => r.blob());
       const formData = new FormData();
-      formData.append('image', blob);
+      formData.append('files', blob, 'image.jpg');
 
-      const response = await fetch('/api/detect', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/detect`, {
         method: 'POST',
         body: formData
       });
@@ -29,7 +29,8 @@ export class ObjectDetectionService {
         throw new Error(errorData.error || 'Detection failed');
       }
 
-      return response.json();
+      const data = await response.json();
+      return data.results[0];
     } catch (error) {
       console.error('Service error:', error);
       throw error;
